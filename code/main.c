@@ -22,7 +22,7 @@
 #include <unistd.h>
 
 #define SERVO_X_CHANNEL    0  // pin fisico 29 (PWM0-0), overlay "pwm0"
-#define SERVO_Y_CHANNEL    1  // necesita su propio overlay -- ver arriba
+#define SERVO_Y_CHANNEL    3  // necesita su propio overlay -- ver arriba
 #define SERVO_GRIP_CHANNEL 2  // necesita su propio overlay -- ver arriba
 
 #define SERVO_PERIOD_NS 20000000 // 20 ms -> 50 Hz, estandar servo de hobby
@@ -55,7 +55,8 @@ static double clamp(double v, double lo, double hi)
 static long angle_to_duty_ns(double angle_deg)
 {
     angle_deg = clamp(angle_deg, ANGLE_MIN, ANGLE_MAX);
-    return 1000000L + (long)(angle_deg / 180.0 * 1000000.0); // 1 ms..2 ms
+    long pulse_ns = 1000000L + (long)(angle_deg / 180.0 * 1000000.0); // 1 ms..2 ms
+    return SERVO_PERIOD_NS - pulse_ns;
 }
 
 static long long now_ms(void)
