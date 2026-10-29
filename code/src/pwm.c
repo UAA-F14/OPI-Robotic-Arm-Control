@@ -6,7 +6,7 @@
 #include <sys/stat.h>
 #include <unistd.h>
 
-const int PWM_PIN[8] = {29, 0, 33, 35, 37, 32, 36, 38};
+const int PWM_PIN[8] = {29,33,35, 37, 32, 36, 38,0};
 
 struct pwm_channel {
     int  channel;
