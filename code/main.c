@@ -75,40 +75,50 @@ static long long now_ms(void)
     return (long long)ts.tv_sec * 1000 + ts.tv_nsec / 1000000;
 }
 
-int main(void)
+static void sweep_servo(pwm_channel *servo)
 {
-    struct sigaction sa;
-    memset(&sa, 0, sizeof(sa));
-    sa.sa_handler = on_signal;
-    sigaction(SIGINT, &sa, NULL);
-    sigaction(SIGTERM, &sa, NULL);
-
-    if (ps4_init() != 0)
-        return 1;
-    ps4_calibrate_gyro();
-
-    pwm_channel *servo_x    = pwm_open(SERVO_X_CHANNEL);
-    pwm_channel *servo_y    = pwm_open(SERVO_Y_CHANNEL);
-    pwm_channel *servo_grip = pwm_open(SERVO_GRIP_CHANNEL);
-    pwm_channel *servo_dpad = pwm_open(SERVO_DPAD_CHANNEL);
-    if (!servo_x || !servo_y || !servo_grip || !servo_dpad) {
-        fprintf(stderr, "No se pudo abrir uno de los canales PWM -- "
-                        "revisa que los overlays de los 4 canales esten activos.\n");
-        if (servo_x)    pwm_close(servo_x);
-        if (servo_y)    pwm_close(servo_y);
-        if (servo_grip) pwm_close(servo_grip);
-        if (servo_dpad) pwm_close(servo_dpad);
-        ps4_cleanup();
-        return 1;
+    for (double a = ANGLE_MIN; a <= ANGLE_MAX && running; a += 2.0) {
+        pwm_set_duty_cycle(servo, angle_to_duty_ns(a));
+        usleep(20000);
     }
-    pwm_set_period(servo_x, SERVO_PERIOD_NS);
-    pwm_set_period(servo_y, SERVO_PERIOD_NS);
-    pwm_set_period(servo_grip, SERVO_PERIOD_NS);
-    pwm_set_period(servo_dpad, SERVO_PERIOD_NS);
-    pwm_enable(servo_x);
-    pwm_enable(servo_y);
-    pwm_enable(servo_grip);
-    pwm_enable(servo_dpad);
+    for (double a = ANGLE_MAX; a >= ANGLE_MIN && running; a -= 2.0) {
+        pwm_set_duty_cycle(servo, angle_to_duty_ns(a));
+        usleep(20000);
+    }
+}
+
+static void run_pwm_demo(pwm_channel *servo_x,
+                         pwm_channel *servo_y,
+                         pwm_channel *servo_grip,
+                         pwm_channel *servo_dpad)
+{
+    printf("Demo PWM: barrido secuencial de servos 1->2->3->4. Ctrl+C para salir.\n");
+
+    // Deja todos centrados antes de comenzar la secuencia.
+    pwm_set_duty_cycle(servo_x, angle_to_duty_ns(90.0));
+    pwm_set_duty_cycle(servo_y, angle_to_duty_ns(90.0));
+    pwm_set_duty_cycle(servo_grip, angle_to_duty_ns(90.0));
+    pwm_set_duty_cycle(servo_dpad, angle_to_duty_ns(90.0));
+    usleep(250000);
+
+    while (running) {
+        sweep_servo(servo_x);    // Servo 1
+        sweep_servo(servo_y);    // Servo 2
+        sweep_servo(servo_grip); // Servo 3
+        sweep_servo(servo_dpad); // Servo 4
+    }
+}
+
+static void run_manual_ps4(pwm_channel *servo_x,
+                           pwm_channel *servo_y,
+                           pwm_channel *servo_grip,
+                           pwm_channel *servo_dpad)
+{
+    if (ps4_init() != 0) {
+        fprintf(stderr, "No se detecto control PS4 para modo manual.\n");
+        return;
+    }
+    ps4_calibrate_gyro();
 
     ps4_state ps4;
     memset(&ps4, 0, sizeof(ps4));
@@ -117,7 +127,7 @@ int main(void)
     double angle_dpad = 90.0; // arranca centrado
     long long last_ms = now_ms();
 
-    printf("Brazo listo. Stick izq = servo X, stick der = servo Y, "
+    printf("Modo manual PS4 listo. Stick izq = servo X, stick der = servo Y, "
            "R2 = gripper, D-pad arriba/abajo = servo 4, "
            "L1 = reinicia el trim del giroscopio. Ctrl+C para salir.\n");
 
@@ -158,11 +168,62 @@ int main(void)
         usleep(20000); // 20 ms, al ritmo del periodo del servo
     }
 
+    ps4_cleanup();
+}
+
+int main(void)
+{
+    struct sigaction sa;
+    memset(&sa, 0, sizeof(sa));
+    sa.sa_handler = on_signal;
+    sigaction(SIGINT, &sa, NULL);
+    sigaction(SIGTERM, &sa, NULL);
+
+    pwm_channel *servo_x    = pwm_open(SERVO_X_CHANNEL);
+    pwm_channel *servo_y    = pwm_open(SERVO_Y_CHANNEL);
+    pwm_channel *servo_grip = pwm_open(SERVO_GRIP_CHANNEL);
+    pwm_channel *servo_dpad = pwm_open(SERVO_DPAD_CHANNEL);
+
+    if (!servo_x || !servo_y || !servo_grip || !servo_dpad) {
+        fprintf(stderr, "No se pudo abrir uno de los canales PWM -- "
+                        "revisa que los overlays de los 4 canales esten activos.\n");
+        if (servo_x)    pwm_close(servo_x);
+        if (servo_y)    pwm_close(servo_y);
+        if (servo_grip) pwm_close(servo_grip);
+        if (servo_dpad) pwm_close(servo_dpad);
+        ps4_cleanup();
+        return 1;
+    }
+    pwm_set_period(servo_x, SERVO_PERIOD_NS);
+    pwm_set_period(servo_y, SERVO_PERIOD_NS);
+    pwm_set_period(servo_grip, SERVO_PERIOD_NS);
+    pwm_set_period(servo_dpad, SERVO_PERIOD_NS);
+    
+    pwm_enable(servo_x);
+    pwm_enable(servo_y);
+    pwm_enable(servo_grip);
+    pwm_enable(servo_dpad);
+
+    printf("\nMenu de modos:\n");
+    printf("1) Demo PWM (servos 1->2->3->4)\n");
+    printf("2) Manual con PS4\n");
+    printf("Elige opcion: ");
+
+    char option[16] = {0};
+    if (fgets(option, sizeof(option), stdin) == NULL) {
+        fprintf(stderr, "No se pudo leer la opcion.\n");
+    } else if (option[0] == '1') {
+        run_pwm_demo(servo_x, servo_y, servo_grip, servo_dpad);
+    } else if (option[0] == '2') {
+        run_manual_ps4(servo_x, servo_y, servo_grip, servo_dpad);
+    } else {
+        printf("Opcion invalida.\n");
+    }
+
     printf("\n");
     pwm_close(servo_x);
     pwm_close(servo_y);
     pwm_close(servo_grip);
     pwm_close(servo_dpad);
-    ps4_cleanup();
     return 0;
 }
