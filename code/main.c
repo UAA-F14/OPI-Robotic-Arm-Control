@@ -44,7 +44,7 @@
 // control (da velocidad angular, no un angulo -- hay que integrarlo en
 // el tiempo y eso se desvia solo si no se calibra). GYRO_SENS es una
 // ganancia ajustada a ojo.
-#define GYRO_SENS 1200.0
+#define GYRO_SENS 1000.0
 
 static volatile sig_atomic_t running = 1;
 
