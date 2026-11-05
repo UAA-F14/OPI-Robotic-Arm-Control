@@ -1,3 +1,8 @@
+build/
+.vscode/
+*.o/
+
+
 # LaTeX build artifacts (scoped to docs/ so the LTspice .log in simulation/ stays tracked)
 docs/*.aux
 docs/*.log
