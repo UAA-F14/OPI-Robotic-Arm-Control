@@ -1,0 +1,1 @@
+/usr/bin/cc CMakeFiles/EX2BrazoPS4.dir/main.c.o CMakeFiles/EX2BrazoPS4.dir/src/gpio.c.o CMakeFiles/EX2BrazoPS4.dir/src/pwm.c.o CMakeFiles/EX2BrazoPS4.dir/src/ps4.c.o -o EX2BrazoPS4  -lgpiod 

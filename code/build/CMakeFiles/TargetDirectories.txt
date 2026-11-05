@@ -1,0 +1,3 @@
+/home/orangepi/Scripts/ORANGE-ARM-CONTROLL/code/build/CMakeFiles/EX2BrazoPS4.dir
+/home/orangepi/Scripts/ORANGE-ARM-CONTROLL/code/build/CMakeFiles/edit_cache.dir
+/home/orangepi/Scripts/ORANGE-ARM-CONTROLL/code/build/CMakeFiles/rebuild_cache.dir
