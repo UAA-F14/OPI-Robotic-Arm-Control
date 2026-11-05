@@ -1,36 +1,19 @@
 # ORANGE-ARM-CONTROLL
 
-Brazo de 3 servos (codo X, codo Y, gripper) controlado en tiempo real
-con un control de PS4 por Bluetooth: lectura de sticks, botones y
-giroscopio/acelerómetro por `evdev` puro en C, sin librerías externas
-de joystick.
+4-Servos robotic arm controlled by PS4 controller via Bluetooth, C-based, using `evdev` for real-time input reading.
 
-## Estructura
 
-- **`code/`** — Código para la Orange Pi (el destino final). Una sola
-  biblioteca/programa:
-  - `inc/` — headers (`gpio.h`, `pwm.h`, `ps4.h`)
-  - `src/` — implementación (`gpio.c`, `pwm.c`, `ps4.c`)
-  - `main.c` — programa principal: lee el control con `ps4.h` y mueve
-    los 3 servos con `pwm.h`
-  - `CMakeLists.txt`
-- **`demo/`** — Prototipos para correr en laptop/escritorio (Linux
-  PC), no en la Orange Pi: lectura por terminal, visualización con
-  SDL2, y la simulación 3D del brazo con OpenGL.
-- **`design/3DDesign/`** — Modelo 3D del brazo (CAD). Placeholder
-  hasta que se comparta el link/archivo del diseño.
 
-## Control
-
+**Control**
 | Entrada | Acción |
 |---|---|
-| Stick izquierdo | Servo X (base) |
-| Stick derecho | Servo Y |
-| Girar la muñeca / inclinar el control | Trim que se suma a los sticks (giroscopio) |
-| L1 | Reinicia el trim del giroscopio |
-| Gatillo R2 | Gripper (a fondo = cerrado) |
+| Left Stick  | Servo X (base) |
+| Right Stick | Servo Y |
+| Twist wrist/ tilt controller | Trim added to the sticks (gyroscope) |
+| L1 | Reset gyro rim |
+| R2 Trigger | Gripper (fully pressed = closed) |
 
-## Conectar el DS4 por Bluetooth
+**Connect DS4 to the Orange Pi**
 
 ```bash
 bluetoothctl
@@ -42,15 +25,9 @@ trust <MAC>
 connect <MAC>
 ```
 
-Esta placa necesita los drivers `hid-sony` y `hid-playstation`
-compilados aparte (el kernel vendor no los trae) para que el
-giroscopio/acelerómetro aparezcan como un dispositivo de entrada
-separado ("Wireless Controller Motion Sensors"). Si da "Permission
-denied" en el canal HID aunque ya esté "Bonded: yes", es que el agente
-de emparejamiento no forzó "Just Works" — por eso el
-`agent NoInputNoOutput` antes de parear.
 
-## Compilar (Orange Pi, `code/`)
+
+**Compilar (Orange Pi, `code/`)**
 
 ```bash
 cd code
@@ -59,19 +36,60 @@ cmake --build build
 ./build/EX2BrazoPS4
 ```
 
-## Compilar (laptop, `demo/`)
 
-```bash
-cd demo
-gcc ds4_read.c -o ds4_read
-gcc ds4_gui.c -o ds4_gui $(pkg-config --cflags --libs sdl2) -lm
-gcc ds4_arm3d.c -o ds4_arm3d $(pkg-config --cflags --libs sdl2) -lGL -lGLU -lm
+## Directory structure
+```
+├── code
+│   ├── build
+│   │   ├── EX2BrazoPS4
+│   ├── CMakeLists.txt
+│   ├── inc
+│   │   ├── gpio.h
+│   │   ├── ps4.h
+│   │   └── pwm.h
+│   ├── main.c
+│   └── src
+│       ├── gpio.c
+│       ├── ps4.c
+│       └── pwm.c
+├── design
+│   ├── 3DDesign
+│   │   ├── 449747-brazo-robotico-robotic-arm-33f3bc05-b693-46d1-aa83-425e5f54e855.pdf
+│   │   ├── brazo-robotico-robotic-arm-model_files.zip
+│   │   └── KKP3_ARM.gcode
+│   └── KicadDesign
+│       ├── KicadDesign.kicad_pcb
+│       ├── KicadDesign.kicad_pro
+│       └── KicadDesign.kicad_sch
+└── README.md
 ```
 
-## Pendiente
 
-Cada servo (X, Y, gripper) necesita su propio pin de PWM por hardware,
-y cada canal requiere su propio *overlay* de device tree activado en
-`/boot/orangepiEnv.txt` (igual que el canal 0 -> pin físico 29 con el
-overlay `pwm0`). Falta configurar los overlays de los canales 1 y 2
-cuando estén conectados los 3 servos físicos.
+
+- `Design.kicad_sch` / `.kicad_pcb` / `.kicad_pro` — KiCad design
+- `code/` Orange Pi code
+  - `inc/` — headers (`gpio.h`, `pwm.h`, `ps4.h`)
+  - `src/` — implementation (`gpio.c`, `pwm.c`, `ps4.c`)
+  - `main.c` — main program: reads the controller with `ps4.h` and moves the 3 servos with `pwm.h`
+  - `CMakeLists.txt` — CMake build file
+
+![3D render](render.png)
+
+
+
+## Credit
+Built as coursework with [DasReyxr](https://github.com/DasReyxr)  and [Kevin Lara](https://github.com/Gyonyu)
+
+
+
+
+
+## Template
+```
+mkdir code design doc scripts sim src
+```
+
+```
+tree >> README.md
+```
+
