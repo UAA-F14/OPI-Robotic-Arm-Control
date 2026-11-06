@@ -1,10 +1,9 @@
 # ORANGE-ARM-CONTROLL
-<img width="2154" height="1044" alt="image" src="https://github.com/user-attachments/assets/cc148a82-939a-450d-9254-3bda78d64a3c" />
-
 
 4-Servos robotic arm controlled by PS4 controller via Bluetooth, C-based, using `evdev` for real-time input reading.
 
 
+![Demo](src/README/image.png)
 
 **Control**
 | Entrada | Acción |
@@ -75,7 +74,6 @@ cmake --build build
   - `main.c` — main program: reads the controller with `ps4.h` and moves the 3 servos with `pwm.h`
   - `CMakeLists.txt` — CMake build file
 
-![3D render](render.png)
 
 
 
@@ -95,3 +93,5 @@ mkdir code design doc scripts sim src
 tree >> README.md
 ```
 
+
+![QR](src/README/OPI-Robotic-Arm-Control.png)
