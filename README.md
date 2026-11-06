@@ -1,4 +1,6 @@
 # ORANGE-ARM-CONTROLL
+<img width="2154" height="1044" alt="image" src="https://github.com/user-attachments/assets/cc148a82-939a-450d-9254-3bda78d64a3c" />
+
 
 4-Servos robotic arm controlled by PS4 controller via Bluetooth, C-based, using `evdev` for real-time input reading.
 
