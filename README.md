@@ -1,9 +1,10 @@
-# ORANGE-ARM-CONTROLL
+# OPI-Robotic Arm Control
 
 4-Servos robotic arm controlled by PS4 controller via Bluetooth, C-based, using `evdev` for real-time input reading.
 
+![Demo](src/README/image-1.png)
 
-![Demo](src/README/image.png)
+
 
 **Control**
 | Entrada | Acción |
