@@ -2,7 +2,10 @@
 
 4-Servos robotic arm controlled by PS4 controller via Bluetooth, C-based, using `evdev` for real-time input reading.
 
-![Demo](src/README/image-1.png)
+
+
+
+https://github.com/user-attachments/assets/cc04c3ed-7461-4495-9bd4-6bf7d56030bc
 
 
 
